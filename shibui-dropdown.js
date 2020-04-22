@@ -24,8 +24,9 @@ class ShibuiDropdown extends LitElement {
       /**
        * The target to attach the dropdown to.
        */
-      target: Element,
-
+      target: {
+        type: Element
+      },  
       /**
        * The buffer from the edge of the page
        */
@@ -67,13 +68,6 @@ class ShibuiDropdown extends LitElement {
           pointer-events: all;
 
           user-select: none;
-          -moz-user-select: none;
-          -webkit-user-select: none;
-          -ms-user-select: none;
-        }
-
-        :host([alignment="left"]) {
-          right: 0;
         }
 
         :host ::slotted(*) {
@@ -107,6 +101,7 @@ class ShibuiDropdown extends LitElement {
     this.opened = false;
     this.buffer = 10;
     this._close = this.close.bind( this );
+    this._resize = this.resize.bind( this );
 
   }
 
@@ -134,23 +129,44 @@ class ShibuiDropdown extends LitElement {
   updated(changedProperties) {
     changedProperties.forEach((oldValue, propName) => {
       if (propName == 'opened') {
-        this._openedChanged(this.opened);
+        this._openedChanged();
       }
     });
   }
 
-  _openedChanged(open) {
-    if (open) {
-      //this.resize();
+  resize() {
+    var target = this.target || this.parentElement;
+
+    if (!this.opened || !target) return;
+
+    var rect = target.getBoundingClientRect();
+    var left = rect.x;
+    if (this.alignment === 'right') {
+      left += rect.width - this.clientWidth;
+    } else if (this.alignment === 'center') {
+      left += (rect.width / 2) - (this.clientWidth / 2);
+    }
+
+    left = Math.min(window.innerWidth - this.clientWidth - this.buffer, left);
+    left = Math.max(this.buffer, left);
+
+    this.style.left = left + 'px';
+    this.style.top = rect.y + rect.height + this.buffer + 'px';
+  }
+
+  _openedChanged() {
+    console.log("Target="+this.target);
+    if (this.opened) {
+      this.resize();
       // Note: setTimeout is used to delay adding the event listener until after the current event is complete
       setTimeout(() => {
         document.addEventListener('click', this._close);
-        //window.addEventListener('resize', this.resize, {
-        //  passive: true
-        //});
-        //window.addEventListener('scroll', this.resize, {
-        //  passive: true
-        //});
+        window.addEventListener('resize', this._resize, {
+          passive: true
+        });
+        window.addEventListener('scroll', this._resize, {
+          passive: true
+        });
       });
     } else {
       document.removeEventListener('click', this._close);

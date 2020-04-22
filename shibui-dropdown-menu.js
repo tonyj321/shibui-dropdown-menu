@@ -47,7 +47,7 @@ class ShibuiDropdownMenu extends LitElement {
             <div class="trigger" @click="${this._toggle}">
               <slot id="trigger" name="trigger"></slot>
             </div>
-            <shibui-dropdown id="dropdown" ?opened=${this.opened} alignment="${this.alignment}" target="${this._target}">
+            <shibui-dropdown id="dropdown" ?opened=${this.opened} alignment="${this.alignment}">
                 <slot></slot>
             </shibui-dropdown>
         `;
@@ -61,11 +61,12 @@ class ShibuiDropdownMenu extends LitElement {
 
     connectedCallback() {
         super.connectedCallback();
-        this._target = this._triggerElement;
     }
 
-    _toggle() {
-        this.shadowRoot.querySelector("#dropdown").toggle();
+    _toggle(e) {
+        let dropdown = this.shadowRoot.querySelector("#dropdown");
+        dropdown.target = this.shadowRoot.querySelector("#trigger").assignedElements()[0];
+        dropdown.toggle();
     }
 }
 ;
