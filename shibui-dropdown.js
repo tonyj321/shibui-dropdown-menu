@@ -19,13 +19,6 @@ class ShibuiDropdown extends LitElement {
        */
       alignment: {
         type: String
-      },
-
-      /**
-       * The target to attach the dropdown to.
-       */
-      target: {
-        type: Element
       },  
       /**
        * The buffer from the edge of the page
@@ -100,6 +93,7 @@ class ShibuiDropdown extends LitElement {
     this.alignment = 'right';
     this.opened = false;
     this.buffer = 10;
+    this.target = null;
     this._close = this.close.bind( this );
     this._resize = this.resize.bind( this );
 
@@ -127,8 +121,9 @@ class ShibuiDropdown extends LitElement {
   }
 
   updated(changedProperties) {
+    super.updated(changedProperties);
     changedProperties.forEach((oldValue, propName) => {
-      if (propName == 'opened') {
+      if (propName == 'opened' && typeof oldValue !== 'undefined') {
         this._openedChanged();
       }
     });
